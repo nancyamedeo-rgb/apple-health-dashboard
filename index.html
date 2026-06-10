@@ -8,10 +8,10 @@
   <style>
     body {
       margin: 0;
+      padding: 20px;
       font-family: Arial, sans-serif;
       background: #0b0f14;
       color: white;
-      padding: 20px;
     }
 
     .card {
@@ -27,7 +27,7 @@
     }
 
     .value {
-      font-size: 22px;
+      font-size: 24px;
       margin-top: 5px;
     }
 
@@ -42,88 +42,87 @@
 
     #error {
       color: #ff6b6b;
+      margin-top: 10px;
     }
   </style>
 </head>
 
 <body>
 
-  <h2>Apple Health Dashboard</h2>
+<h2>Apple Health Dashboard</h2>
 
-  <div class="card">
-    <div class="label">Steps</div>
-    <div class="value" id="steps">--</div>
-  </div>
+<div class="card">
+  <div class="label">Steps</div>
+  <div class="value" id="steps">--</div>
+</div>
 
-  <div class="card">
-    <div class="label">Heart Rate</div>
-    <div class="value" id="heartRate">--</div>
-  </div>
+<div class="card">
+  <div class="label">Heart Rate</div>
+  <div class="value" id="heartRate">--</div>
+</div>
 
-  <div class="card">
-    <div class="label">Active Energy</div>
-    <div class="value" id="energy">--</div>
-  </div>
+<div class="card">
+  <div class="label">Active Energy</div>
+  <div class="value" id="energy">--</div>
+</div>
 
-  <div class="card">
-    <div class="label">Distance</div>
-    <div class="value" id="distance">--</div>
-  </div>
+<div class="card">
+  <div class="label">Distance</div>
+  <div class="value" id="distance">--</div>
+</div>
 
-  <div class="card">
-    <h3>RAW API RESPONSE</h3>
-    <pre id="raw"></pre>
-  </div>
+<div class="card">
+  <h3>RAW API RESPONSE</h3>
+  <pre id="raw"></pre>
+</div>
 
-  <div class="card">
-    <h3>LATEST ROW (selected)</h3>
-    <pre id="latest"></pre>
-  </div>
+<div class="card">
+  <h3>LATEST DATA (resolved)</h3>
+  <pre id="latest"></pre>
+</div>
 
-  <div id="error"></div>
+<div id="error"></div>
 
 <script>
 
 const API_URL = "https://script.google.com/macros/s/AKfycbyILualskjRxdTfVLiDVNZ-kBT1TwtLgwi8eay-DLH0MrXHC0OlQe_BmzHCtbrd7YQKTQ/exec";
 
-// -----------------------------
-// FIX: find last meaningful row
-// -----------------------------
-function isValidRow(r) {
-  return (
-    (r.steps && r.steps > 0) ||
-    (r.heartRate && r.heartRate > 0) ||
-    (r.activeEnergy && r.activeEnergy > 0) ||
-    (r.distance && r.distance > 0)
-  );
-}
-
 async function loadData() {
   try {
 
-    console.log("Fetching:", API_URL);
+    console.log("Fetching API:", API_URL);
 
     const res = await fetch(API_URL);
     const data = await res.json();
 
     console.log("RAW DATA:", data);
 
-    // -----------------------------------
-    // FIXED latest selection logic
-    // -----------------------------------
-    const latest =
-      [...data].reverse().find(isValidRow)
-      || data[data.length - 1];
+    // --------------------------------------------------
+    // SAFE NORMALIZATION (fixes "data is not iterable")
+    // --------------------------------------------------
+    let latest;
 
-    console.log("LATEST SELECTED:", latest);
+    if (Array.isArray(data)) {
+      latest = data[data.length - 1];
+    } else if (data && typeof data === "object") {
+      latest = data;
+    } else {
+      throw new Error("Unexpected API response format");
+    }
 
-    // Update UI
+    console.log("LATEST RESOLVED:", latest);
+
+    // -----------------------
+    // UPDATE UI
+    // -----------------------
     document.getElementById("steps").textContent = latest.steps ?? 0;
     document.getElementById("heartRate").textContent = latest.heartRate ?? 0;
     document.getElementById("energy").textContent = latest.activeEnergy ?? 0;
     document.getElementById("distance").textContent = latest.distance ?? 0;
 
-    // Debug panels
+    // -----------------------
+    // DEBUG PANELS
+    // -----------------------
     document.getElementById("raw").textContent =
       JSON.stringify(data, null, 2);
 
@@ -133,7 +132,7 @@ async function loadData() {
   } catch (err) {
     console.error(err);
     document.getElementById("error").textContent =
-      "ERROR: Failed to load API";
+      "ERROR: Failed to load API (check console)";
   }
 }
 
