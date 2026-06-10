@@ -1,202 +1,166 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Apple Health Dashboard</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Apple Health Dashboard</title>
 
-  <link rel="icon" href="data:,">
+<link rel="icon" href="data:,">
 
-  <style>
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
-      background: #0b0f14;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 30px;
-    }
+<style>
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, Arial;
+  background: #0b0f14;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px;
+}
 
-    h1 {
-      font-weight: 600;
-      margin-bottom: 25px;
-      opacity: 0.9;
-    }
+h1 { margin-bottom: 25px; }
 
-    /* ---------------- RINGS ---------------- */
-    .rings {
-      display: flex;
-      gap: 25px;
-      margin-bottom: 30px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
+/* rings */
+.rings { display: flex; gap: 25px; }
 
-    .ring {
-      width: 140px;
-      height: 140px;
-      position: relative;
-    }
+.ring { width: 140px; height: 140px; position: relative; }
 
-    svg {
-      transform: rotate(-90deg);
-    }
+svg { transform: rotate(-90deg); }
 
-    .bg {
-      fill: none;
-      stroke: #1e2a38;
-      stroke-width: 10;
-    }
+.bg {
+  fill: none;
+  stroke: #1e2a38;
+  stroke-width: 10;
+}
 
-    .progress {
-      fill: none;
-      stroke-width: 10;
-      stroke-linecap: round;
-      transition: stroke-dashoffset 1s ease;
-    }
+.progress {
+  fill: none;
+  stroke-width: 10;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.8s ease;
+}
 
-    .label {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-    }
+.steps { stroke: #32d74b; }
+.energy { stroke: #ff2d55; }
+.distance { stroke: #0a84ff; }
 
-    .value {
-      font-size: 20px;
-      font-weight: 600;
-    }
+.label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
 
-    .name {
-      font-size: 11px;
-      opacity: 0.6;
-      letter-spacing: 1px;
-    }
+.value { font-size: 20px; font-weight: 600; }
+.name { font-size: 11px; opacity: 0.6; }
 
-    .steps { stroke: #32d74b; }
-    .energy { stroke: #ff2d55; }
-    .distance { stroke: #0a84ff; }
+.cards {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 320px;
+}
 
-    /* ---------------- CARDS ---------------- */
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-      width: 320px;
-      margin-top: 10px;
-    }
+.card {
+  background: #141c26;
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+}
 
-    .card {
-      background: #141c26;
-      border-radius: 14px;
-      padding: 14px;
-      text-align: center;
-    }
+.card-title {
+  font-size: 11px;
+  opacity: 0.6;
+}
 
-    .card-title {
-      font-size: 11px;
-      opacity: 0.6;
-      letter-spacing: 1px;
-      margin-bottom: 6px;
-    }
-
-    .card-value {
-      font-size: 22px;
-      font-weight: 600;
-    }
-
-    .hr-card {
-      grid-column: span 2;
-    }
-  </style>
+.card-value {
+  font-size: 22px;
+  font-weight: 600;
+}
+</style>
 </head>
 
 <body>
 
 <h1>Apple Health Dashboard</h1>
 
-<!-- RINGS -->
 <div class="rings">
 
-  <div class="ring">
-    <svg width="140" height="140">
-      <circle class="bg" cx="70" cy="70" r="55"></circle>
-      <circle id="stepsRing" class="progress steps" cx="70" cy="70" r="55"></circle>
-    </svg>
-    <div class="label">
-      <div class="value" id="steps">--</div>
-      <div class="name">STEPS</div>
-    </div>
-  </div>
+<div class="ring">
+<svg width="140" height="140">
+<circle class="bg" cx="70" cy="70" r="55"/>
+<circle id="stepsRing" class="progress steps" cx="70" cy="70" r="55"/>
+</svg>
+<div class="label">
+<div class="value" id="steps">--</div>
+<div class="name">STEPS</div>
+</div>
+</div>
 
-  <div class="ring">
-    <svg width="140" height="140">
-      <circle class="bg" cx="70" cy="70" r="55"></circle>
-      <circle id="energyRing" class="progress energy" cx="70" cy="70" r="55"></circle>
-    </svg>
-    <div class="label">
-      <div class="value" id="activeEnergy">--</div>
-      <div class="name">MOVE</div>
-    </div>
-  </div>
+<div class="ring">
+<svg width="140" height="140">
+<circle class="bg" cx="70" cy="70" r="55"/>
+<circle id="energyRing" class="progress energy" cx="70" cy="70" r="55"/>
+</svg>
+<div class="label">
+<div class="value" id="energy">--</div>
+<div class="name">MOVE</div>
+</div>
+</div>
 
-  <div class="ring">
-    <svg width="140" height="140">
-      <circle class="bg" cx="70" cy="70" r="55"></circle>
-      <circle id="distanceRing" class="progress distance" cx="70" cy="70" r="55"></circle>
-    </svg>
-    <div class="label">
-      <div class="value" id="distance">--</div>
-      <div class="name">MILES</div>
-    </div>
-  </div>
+<div class="ring">
+<svg width="140" height="140">
+<circle class="bg" cx="70" cy="70" r="55"/>
+<circle id="distanceRing" class="progress distance" cx="70" cy="70" r="55"/>
+</svg>
+<div class="label">
+<div class="value" id="distance">--</div>
+<div class="name">MILES</div>
+</div>
+</div>
 
 </div>
 
-<!-- CARDS -->
 <div class="cards">
+<div class="card">
+<div class="card-title">HEART RATE</div>
+<div class="card-value" id="heartRate">--</div>
+</div>
 
-  <div class="card hr-card">
-    <div class="card-title">HEART RATE</div>
-    <div class="card-value" id="heartRate">--</div>
-  </div>
+<div class="card">
+<div class="card-title">RESTING HR</div>
+<div class="card-value" id="restingHeartRate">--</div>
+</div>
 
-  <div class="card">
-    <div class="card-title">RESTING HR</div>
-    <div class="card-value" id="restingHeartRate">--</div>
-  </div>
+<div class="card">
+<div class="card-title">EXERCISE</div>
+<div class="card-value" id="exerciseMinutes">--</div>
+</div>
 
-  <div class="card">
-    <div class="card-title">EXERCISE</div>
-    <div class="card-value" id="exerciseMinutes">--</div>
-  </div>
-
-  <div class="card">
-    <div class="card-title">STAND</div>
-    <div class="card-value" id="standHours">--</div>
-  </div>
-
+<div class="card">
+<div class="card-title">STAND</div>
+<div class="card-value" id="standHours">--</div>
+</div>
 </div>
 
 <script>
 
 const API_URL = "https://script.google.com/macros/s/AKfycbyILualskjRxdTfVLiDVNZ-kBT1TwtLgwi8eay-DLH0MrXHC0OlQe_BmzHCtbrd7YQKTQ/exec";
 
-/* ---------------- RING SETUP ---------------- */
 function setupRing(id) {
-  const circle = document.getElementById(id);
+  const c = document.getElementById(id);
   const r = 55;
-  const c = 2 * Math.PI * r;
+  const len = 2 * Math.PI * r;
 
-  circle.style.strokeDasharray = c;
-  circle.style.strokeDashoffset = c;
+  c.style.strokeDasharray = len;
+  c.style.strokeDashoffset = len;
 
   return (p) => {
-    const clamped = Math.max(0, Math.min(1, p));
-    circle.style.strokeDashoffset = c - clamped * c;
+    const v = Math.max(0, Math.min(1, p));
+    c.style.strokeDashoffset = len - v * len;
   };
 }
 
@@ -204,30 +168,27 @@ const setSteps = setupRing("stepsRing");
 const setEnergy = setupRing("energyRing");
 const setDistance = setupRing("distanceRing");
 
-/* ---------------- LOAD DATA ---------------- */
-function loadData() {
-  const s = document.createElement("script");
-  s.src = API_URL + "?callback=handleData";
-  document.body.appendChild(s);
-}
+async function loadData() {
+  try {
+    const res = await fetch(API_URL);
+    const data = await res.json();
 
-function handleData(data) {
+    document.getElementById("steps").textContent = data.steps || 0;
+    document.getElementById("energy").textContent = data.activeEnergy || 0;
+    document.getElementById("distance").textContent = (data.distance || 0).toFixed(2);
 
-  // TEXT
-  document.getElementById("steps").textContent = Math.round(data.steps || 0);
-  document.getElementById("activeEnergy").textContent = Math.round(data.activeEnergy || 0);
-  document.getElementById("distance").textContent = (data.distance || 0).toFixed(2);
+    document.getElementById("heartRate").textContent = data.heartRate || 0;
+    document.getElementById("restingHeartRate").textContent = data.restingHeartRate || 0;
+    document.getElementById("exerciseMinutes").textContent = data.exerciseMinutes || 0;
+    document.getElementById("standHours").textContent = data.standHours || 0;
 
-  document.getElementById("heartRate").textContent = Math.round(data.heartRate || 0);
-  document.getElementById("restingHeartRate").textContent = Math.round(data.restingHeartRate || 0);
+    setSteps((data.steps || 0) / 10000);
+    setEnergy((data.activeEnergy || 0) / 500);
+    setDistance((data.distance || 0) / 5);
 
-  document.getElementById("exerciseMinutes").textContent = Math.round(data.exerciseMinutes || 0);
-  document.getElementById("standHours").textContent = Math.round(data.standHours || 0);
-
-  // RINGS (simple scaling)
-  setSteps((data.steps || 0) / 10000);
-  setEnergy((data.activeEnergy || 0) / 500);
-  setDistance((data.distance || 0) / 5);
+  } catch (e) {
+    console.error("API error:", e);
+  }
 }
 
 loadData();
