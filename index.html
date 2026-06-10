@@ -19,12 +19,12 @@
 
     h1 {
       font-weight: 600;
-      margin-bottom: 20px;
+      margin-bottom: 25px;
       opacity: 0.9;
     }
 
     /* -----------------------
-       RING CONTAINER
+       RINGS
     ------------------------ */
     .rings {
       display: flex;
@@ -71,30 +71,37 @@
     .name {
       font-size: 11px;
       opacity: 0.6;
+      letter-spacing: 1px;
     }
 
-    /* Colors like Apple Fitness */
     .move { stroke: #ff2d55; }
     .steps { stroke: #32d74b; }
     .distance { stroke: #0a84ff; }
 
     /* -----------------------
-       RAW DATA PANEL
+       HEART RATE CARD
     ------------------------ */
-    .panel {
-      width: 90%;
-      max-width: 700px;
+    .card {
+      width: 320px;
       background: #141c26;
-      border-radius: 12px;
-      padding: 15px;
-      margin-top: 20px;
+      border-radius: 14px;
+      padding: 18px;
+      text-align: center;
+      margin-top: 10px;
     }
 
-    pre {
+    .card-title {
       font-size: 12px;
-      overflow-x: auto;
-      opacity: 0.85;
+      opacity: 0.6;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
     }
+
+    .card-value {
+      font-size: 34px;
+      font-weight: 600;
+    }
+
   </style>
 </head>
 
@@ -104,7 +111,7 @@
 
 <div class="rings">
 
-  <!-- MOVE (Active Energy) -->
+  <!-- MOVE -->
   <div class="ring">
     <svg width="140" height="140">
       <circle class="bg" cx="70" cy="70" r="55"></circle>
@@ -145,14 +152,10 @@
 
 </div>
 
-<div class="panel">
-  <h3>Heart Rate</h3>
-  <div style="font-size:28px" id="heartRate">--</div>
-</div>
-
-<div class="panel">
-  <h3>Raw API Response</h3>
-  <pre id="raw"></pre>
+<!-- CLEAN HEART RATE CARD -->
+<div class="card">
+  <div class="card-title">HEART RATE</div>
+  <div class="card-value" id="heartRate">--</div>
 </div>
 
 <script>
@@ -180,52 +183,31 @@ const setMove = setupRing("moveRing");
 const setSteps = setupRing("stepsRing");
 const setDistance = setupRing("distanceRing");
 
+function clamp01(v) {
+  return Math.max(0, Math.min(1, v));
+}
+
 /* -----------------------
-   MAIN LOAD
+   DATA LOADER (JSONP)
 ------------------------ */
 function loadData() {
-
   const script = document.createElement("script");
   script.src = API_URL + "?callback=handleData";
   document.body.appendChild(script);
 }
 
-function clamp01(v) {
-  return Math.max(0, Math.min(1, v));
-}
-
-function animateNumber(id, value) {
-  document.getElementById(id).textContent = Math.round(value);
-}
-
 function handleData(data) {
 
-  console.log("DATA:", data);
+  // Update numbers
+  document.getElementById("steps").textContent = Math.round(data.steps || 0);
+  document.getElementById("energy").textContent = Math.round(data.activeEnergy || 0);
+  document.getElementById("distance").textContent = (data.distance || 0).toFixed(2);
+  document.getElementById("heartRate").textContent = Math.round(data.heartRate || 0);
 
-  // -----------------------
-  // UPDATE NUMBERS
-  // -----------------------
-  animateNumber("steps", data.steps || 0);
-  animateNumber("energy", data.activeEnergy || 0);
-  animateNumber("distance", data.distance || 0);
-  animateNumber("heartRate", data.heartRate || 0);
-
-  // -----------------------
-  // SIMPLE SCALING (tweak later)
-  // -----------------------
-  const stepsPct = clamp01((data.steps || 0) / 10000);
-  const movePct = clamp01((data.activeEnergy || 0) / 500);
-  const distPct = clamp01((data.distance || 0) / 5);
-
-  setSteps(stepsPct);
-  setMove(movePct);
-  setDistance(distPct);
-
-  // -----------------------
-  // DEBUG RAW
-  // -----------------------
-  document.getElementById("raw").textContent =
-    JSON.stringify(data, null, 2);
+  // Rings (simple scaling)
+  setSteps(clamp01((data.steps || 0) / 10000));
+  setMove(clamp01((data.activeEnergy || 0) / 500));
+  setDistance(clamp01((data.distance || 0) / 5));
 }
 
 loadData();
