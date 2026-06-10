@@ -1,38 +1,102 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Apple Health Dashboard</title>
+
   <style>
-    body { font-family: Arial; background:#0b0f14; color:white; padding:20px; }
-    .card { background:#141c26; padding:10px; margin:10px 0; border-radius:8px; }
-    pre { white-space: pre-wrap; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0b0f14;
+      color: white;
+      padding: 20px;
+    }
+
+    .card {
+      background: #141c26;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 10px;
+    }
+
+    .label {
+      font-size: 12px;
+      opacity: 0.7;
+    }
+
+    .value {
+      font-size: 22px;
+      margin-top: 5px;
+    }
+
+    pre {
+      background: #0f1722;
+      padding: 10px;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 12px;
+      max-height: 300px;
+    }
+
+    #error {
+      color: #ff6b6b;
+    }
   </style>
 </head>
 
 <body>
 
-<h2>Apple Health DEBUG</h2>
+  <h2>Apple Health Dashboard</h2>
 
-<div class="card">Steps: <span id="steps">--</span></div>
-<div class="card">Heart Rate: <span id="heartRate">--</span></div>
-<div class="card">Energy: <span id="energy">--</span></div>
-<div class="card">Distance: <span id="distance">--</span></div>
+  <div class="card">
+    <div class="label">Steps</div>
+    <div class="value" id="steps">--</div>
+  </div>
 
-<div class="card">
-  <h3>RAW RESPONSE</h3>
-  <pre id="raw"></pre>
-</div>
+  <div class="card">
+    <div class="label">Heart Rate</div>
+    <div class="value" id="heartRate">--</div>
+  </div>
 
-<div class="card">
-  <h3>LATEST ROW</h3>
-  <pre id="latest"></pre>
-</div>
+  <div class="card">
+    <div class="label">Active Energy</div>
+    <div class="value" id="energy">--</div>
+  </div>
 
-<div id="error" style="color:red;"></div>
+  <div class="card">
+    <div class="label">Distance</div>
+    <div class="value" id="distance">--</div>
+  </div>
+
+  <div class="card">
+    <h3>RAW API RESPONSE</h3>
+    <pre id="raw"></pre>
+  </div>
+
+  <div class="card">
+    <h3>LATEST ROW (selected)</h3>
+    <pre id="latest"></pre>
+  </div>
+
+  <div id="error"></div>
 
 <script>
 
 const API_URL = "https://script.google.com/macros/s/AKfycbyILualskjRxdTfVLiDVNZ-kBT1TwtLgwi8eay-DLH0MrXHC0OlQe_BmzHCtbrd7YQKTQ/exec";
+
+// -----------------------------
+// FIX: find last meaningful row
+// -----------------------------
+function isValidRow(r) {
+  return (
+    (r.steps && r.steps > 0) ||
+    (r.heartRate && r.heartRate > 0) ||
+    (r.activeEnergy && r.activeEnergy > 0) ||
+    (r.distance && r.distance > 0)
+  );
+}
 
 async function loadData() {
   try {
@@ -40,25 +104,26 @@ async function loadData() {
     console.log("Fetching:", API_URL);
 
     const res = await fetch(API_URL);
-    const text = await res.text();
+    const data = await res.json();
 
-    console.log("RAW TEXT:", text);
+    console.log("RAW DATA:", data);
 
-    const data = JSON.parse(text);
+    // -----------------------------------
+    // FIXED latest selection logic
+    // -----------------------------------
+    const latest =
+      [...data].reverse().find(isValidRow)
+      || data[data.length - 1];
 
-    console.log("PARSED:", data);
+    console.log("LATEST SELECTED:", latest);
 
-    const latest = Array.isArray(data)
-      ? data[data.length - 1]
-      : data;
-
-    console.log("LATEST:", latest);
-
+    // Update UI
     document.getElementById("steps").textContent = latest.steps ?? 0;
     document.getElementById("heartRate").textContent = latest.heartRate ?? 0;
     document.getElementById("energy").textContent = latest.activeEnergy ?? 0;
     document.getElementById("distance").textContent = latest.distance ?? 0;
 
+    // Debug panels
     document.getElementById("raw").textContent =
       JSON.stringify(data, null, 2);
 
@@ -68,7 +133,7 @@ async function loadData() {
   } catch (err) {
     console.error(err);
     document.getElementById("error").textContent =
-      "ERROR loading API — check console";
+      "ERROR: Failed to load API";
   }
 }
 
