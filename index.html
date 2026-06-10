@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Apple Fitness Dashboard</title>
+
+<style>
+/* =========================
+   BASE
+========================= */
+
+body {
+    margin: 0;
+    background: radial-gradient(circle at top, #0b0b10, #000);
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow: hidden;
+}
+
+/* =========================
+   LAYOUT
+========================= */
+
+.dashboard {
+    display: flex;
+    height: 100vh;
+    padding: 28px;
+    gap: 40px;
+    box-sizing: border-box;
+}
+
+/* =========================
+   LEFT RINGS PANEL
+========================= */
+
+.left {
+    width: 460px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rings {
+    position: relative;
+    width: 420px;
+    height: 420px;
+    filter: drop-shadow(0 0 18px rgba(255,45,85,0.25));
+}
+
+svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+/* background rings */
+.bg {
+    fill: none;
+    stroke: rgba(255,255,255,0.06);
+    stroke-width: 26;
+}
+
+/* glow base */
+.ring {
+    fill: none;
+    stroke-linecap: round;
+    stroke-width: 26;
+    transition: stroke-dashoffset 1s ease;
+    filter: drop-shadow(0 0 10px currentColor);
+}
+
+/* Apple-like colors */
+.move { stroke: #ff2d55; color: #ff2d55; }
+.exercise { stroke: #b4ff00; color: #b4ff00; }
+.stand { stroke: #00c7ff; color: #00c7ff; }
+
+/* center text */
+.center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.big {
+    font-size: 72px;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.small {
+    font-size: 18px;
+    opacity: 0.7;
+}
+
+/* =========================
+   RIGHT STATS (GLASS)
+========================= */
+
+.stats {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    align-content: center;
+}
+
+.card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 14px 16px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+}
+
+.label {
+    font-size: 14px;
+    opacity: 0.6;
+}
+
+.value {
+    font-size: 40px;
+    font-weight: 750;
+    letter-spacing: -0.5px;
+}
+
+/* =========================
+   CHARTS
+========================= */
+
+.charts {
+    position: absolute;
+    bottom: 18px;
+    left: 18px;
+    right: 18px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    height: 170px;
+}
+
+canvas {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+}
+
+/* subtle glow edge */
+canvas:hover {
+    border-color: rgba(255,255,255,0.15);
+}
+</style>
+</head>
+
+<body>
+
+<div class="dashboard">
+
+    <!-- ================= LEFT ================= -->
+    <div class="left">
+
+        <div class="rings">
+
+            <svg viewBox="0 0 420 420">
+
+                <circle class="bg" cx="210" cy="210" r="150"/>
+                <circle class="bg" cx="210" cy="210" r="115"/>
+                <circle class="bg" cx="210" cy="210" r="80"/>
+
+                <circle id="moveRing" class="ring move" cx="210" cy="210" r="150"/>
+                <circle id="exerciseRing" class="ring exercise" cx="210" cy="210" r="115"/>
+                <circle id="standRing" class="ring stand" cx="210" cy="210" r="80"/>
+
+            </svg>
+
+            <div class="center">
+                <div class="big" id="movePct">0%</div>
+                <div class="small">Move</div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ================= RIGHT ================= -->
+    <div class="stats">
+
+        <div class="card">
+            <div class="label">Active Energy</div>
+            <div class="value" id="energy">0</div>
+        </div>
+
+        <div class="card">
+            <div class="label">Exercise Minutes</div>
+            <div class="value" id="exercise">0</div>
+        </div>
+
+        <div class="card">
+            <div class="label">Stand Hours</div>
+            <div class="value" id="stand">0</div>
+        </div>
+
+        <div class="card">
+            <div class="label">Steps</div>
+            <div class="value" id="steps">0</div>
+        </div>
+
+        <div class="card">
+            <div class="label">Heart Rate</div>
+            <div class="value" id="hr">0</div>
+        </div>
+
+        <div class="card">
+            <div class="label">Resting HR</div>
+            <div class="value" id="restHR">0</div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ================= CHARTS ================= -->
+<div class="charts">
+    <canvas id="c1"></canvas>
+    <canvas id="c2"></canvas>
+    <canvas id="c3"></canvas>
+    <canvas id="c4"></canvas>
+    <canvas id="c5"></canvas>
+</div>
+
+<script>
+
+const SHEET =
+'https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID/gviz/tq?tqx=out:json';
+
+/* =========================
+   RINGS
+========================= */
+
+function ring(id, r, pct) {
+    const el = document.getElementById(id);
+    const c = 2 * Math.PI * r;
+    el.style.strokeDasharray = c;
+    el.style.strokeDashoffset = c - (Math.min(pct,100)/100)*c;
+}
+
+/* =========================
+   CHART
+========================= */
+
+function draw(canvas, data, title) {
+
+const ctx = canvas.getContext("2d");
+
+canvas.width = canvas.offsetWidth;
+canvas.height = canvas.offsetHeight;
+
+const w = canvas.width;
+const h = canvas.height;
+
+ctx.clearRect(0,0,w,h);
+
+/* title */
+ctx.fillStyle = "rgba(255,255,255,0.8)";
+ctx.font = "13px -apple-system";
+ctx.fillText(title, 12, 18);
+
+/* range */
+const min = Math.min(...data);
+const max = Math.max(...data);
+
+ctx.strokeStyle = "#00c7ff";
+ctx.shadowColor = "#00c7ff";
+ctx.shadowBlur = 8;
+ctx.lineWidth = 2;
+ctx.beginPath();
+
+data.forEach((v,i) => {
+
+    const x = (i/(data.length-1)) * (w-24) + 12;
+    const y = h - ((v-min)/(max-min || 1)) * (h-34) - 10;
+
+    if (i === 0) ctx.moveTo(x,y);
+    else ctx.lineTo(x,y);
+
+});
+
+ctx.stroke();
+ctx.shadowBlur = 0;
+
+}
+
+/* =========================
+   LOAD DATA
+========================= */
+
+async function load() {
+
+const res = await fetch(SHEET);
+const txt = await res.text();
+const json = JSON.parse(txt.substring(47).slice(0,-2));
+
+const rows = json.table.rows;
+const last7 = rows.slice(-7);
+const latest = rows.at(-1);
+
+/* =========================
+   CURRENT VALUES
+========================= */
+
+const energy = latest.c[1]?.v || 0;
+const exercise = latest.c[3]?.v || 0;
+const stand = latest.c[6]?.v || 0;
+const steps = latest.c[98]?.v || 0;
+const hr = latest.c[46]?.v || 0;
+const restHR = latest.c[74]?.v || 0;
+
+/* goals */
+const moveGoal = 500;
+const exGoal = 30;
+const standGoal = 12;
+
+/* rings */
+ring("moveRing",150,(energy/moveGoal)*100);
+ring("exerciseRing",115,(exercise/exGoal)*100);
+ring("standRing",80,(stand/standGoal)*100);
+
+/* UI */
+document.getElementById("movePct").innerText =
+Math.round((energy/moveGoal)*100) + "%";
+
+document.getElementById("energy").innerText = Math.round(energy);
+document.getElementById("exercise").innerText = Math.round(exercise);
+document.getElementById("stand").innerText = Math.round(stand);
+document.getElementById("steps").innerText = Number(steps).toLocaleString();
+document.getElementById("hr").innerText = Math.round(hr);
+document.getElementById("restHR").innerText = Math.round(restHR);
+
+/* =========================
+   7 DAY TRENDS
+========================= */
+
+const energy7 = last7.map(r => r.c[1]?.v || 0);
+const steps7 = last7.map(r => r.c[98]?.v || 0);
+const rest7 = last7.map(r => r.c[74]?.v || 0);
+const ex7 = last7.map(r => r.c[3]?.v || 0);
+const dist7 = last7.map(r => r.c[118]?.v || 0);
+
+/* charts */
+draw(c1, energy7, "Energy");
+draw(c2, steps7, "Steps");
+draw(c3, rest7, "Rest HR");
+draw(c4, ex7, "Exercise");
+draw(c5, dist7, "Distance");
+
+}
+
+load();
+setInterval(load, 300000);
+
+</script>
+
+</body>
+</html>
