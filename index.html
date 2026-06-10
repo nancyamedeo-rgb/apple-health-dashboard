@@ -1,138 +1,81 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Apple Health Debug Dashboard</title>
-
+  <title>Apple Health Dashboard</title>
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0b0f14;
-      color: white;
-    }
-
-    .container {
-      padding: 20px;
-      max-width: 900px;
-      margin: auto;
-    }
-
-    h1 {
-      font-size: 20px;
-    }
-
-    .card {
-      background: #141c26;
-      padding: 12px;
-      margin: 10px 0;
-      border-radius: 10px;
-    }
-
-    .label {
-      font-size: 12px;
-      opacity: 0.7;
-    }
-
-    .value {
-      font-size: 22px;
-      margin-top: 5px;
-    }
-
-    pre {
-      background: #111822;
-      padding: 10px;
-      border-radius: 10px;
-      overflow-x: auto;
-      font-size: 12px;
-      max-height: 300px;
-    }
-
-    .error {
-      color: #ff6b6b;
-    }
+    body { font-family: Arial; background:#0b0f14; color:white; padding:20px; }
+    .card { background:#141c26; padding:10px; margin:10px 0; border-radius:8px; }
+    pre { white-space: pre-wrap; }
   </style>
 </head>
 
 <body>
-  <div class="container">
-    <h1>Apple Health DEBUG Dashboard</h1>
 
-    <div class="card">
-      <div class="label">Steps</div>
-      <div class="value" id="steps">--</div>
-    </div>
+<h2>Apple Health DEBUG</h2>
 
-    <div class="card">
-      <div class="label">Heart Rate</div>
-      <div class="value" id="heartRate">--</div>
-    </div>
+<div class="card">Steps: <span id="steps">--</span></div>
+<div class="card">Heart Rate: <span id="heartRate">--</span></div>
+<div class="card">Energy: <span id="energy">--</span></div>
+<div class="card">Distance: <span id="distance">--</span></div>
 
-    <div class="card">
-      <div class="label">Active Energy</div>
-      <div class="value" id="energy">--</div>
-    </div>
+<div class="card">
+  <h3>RAW RESPONSE</h3>
+  <pre id="raw"></pre>
+</div>
 
-    <div class="card">
-      <div class="label">Distance</div>
-      <div class="value" id="distance">--</div>
-    </div>
+<div class="card">
+  <h3>LATEST ROW</h3>
+  <pre id="latest"></pre>
+</div>
 
-    <div class="card">
-      <div class="label">RAW API RESPONSE</div>
-      <pre id="raw"></pre>
-    </div>
+<div id="error" style="color:red;"></div>
 
-    <div class="card">
-      <div class="label">LATEST ROW</div>
-      <pre id="latest"></pre>
-    </div>
+<script>
 
-    <div class="card error" id="error"></div>
-  </div>
+const API_URL = "https://script.google.com/macros/s/AKfycbyILualskjRxdTfVLiDVNZ-kBT1TwtLgwi8eay-DLH0MrXHC0OlQe_BmzHCtbrd7YQKTQ/exec";
 
-  <script>
-    const API_URL =
-  "https://script.google.com/macros/s/AKfycbyILualskjRxdTfVLiDVNZ-kBT1TwtLgwi8eay-DLH0MrXHC0OlQe_BmzHCtbrd7YQKTQ/exec";
+async function loadData() {
+  try {
 
-    async function loadData() {
-      try {
-        console.log("Fetching API:", API_URL);
+    console.log("Fetching:", API_URL);
 
-        const res = await fetch(API_URL);
-        const data = await res.json();
+    const res = await fetch(API_URL);
+    const text = await res.text();
 
-        console.log("RAW API RESPONSE:", data);
+    console.log("RAW TEXT:", text);
 
-        const latest = Array.isArray(data)
-          ? data[data.length - 1]
-          : data;
+    const data = JSON.parse(text);
 
-        console.log("LATEST ROW:", latest);
+    console.log("PARSED:", data);
 
-        // Update UI
-        document.getElementById("steps").textContent = latest.steps ?? 0;
-        document.getElementById("heartRate").textContent = latest.heartRate ?? 0;
-        document.getElementById("energy").textContent = latest.activeEnergy ?? 0;
-        document.getElementById("distance").textContent = latest.distance ?? 0;
+    const latest = Array.isArray(data)
+      ? data[data.length - 1]
+      : data;
 
-        // Debug panels
-        document.getElementById("raw").textContent =
-          JSON.stringify(data, null, 2);
+    console.log("LATEST:", latest);
 
-        document.getElementById("latest").textContent =
-          JSON.stringify(latest, null, 2);
+    document.getElementById("steps").textContent = latest.steps ?? 0;
+    document.getElementById("heartRate").textContent = latest.heartRate ?? 0;
+    document.getElementById("energy").textContent = latest.activeEnergy ?? 0;
+    document.getElementById("distance").textContent = latest.distance ?? 0;
 
-      } catch (err) {
-        console.error(err);
-        document.getElementById("error").textContent =
-          "ERROR: Failed to load API. Check console.";
-      }
-    }
+    document.getElementById("raw").textContent =
+      JSON.stringify(data, null, 2);
 
-    loadData();
-    setInterval(loadData, 60000);
-  </script>
+    document.getElementById("latest").textContent =
+      JSON.stringify(latest, null, 2);
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById("error").textContent =
+      "ERROR loading API — check console";
+  }
+}
+
+loadData();
+setInterval(loadData, 60000);
+
+</script>
+
 </body>
 </html>
