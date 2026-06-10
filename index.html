@@ -1,43 +1,230 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Apple Health Dashboard</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+      background: #0b0f14;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
+    }
+
+    h1 {
+      font-weight: 600;
+      margin-bottom: 20px;
+      opacity: 0.9;
+    }
+
+    /* -----------------------
+       RING CONTAINER
+    ------------------------ */
+    .rings {
+      display: flex;
+      gap: 25px;
+      margin-bottom: 30px;
+    }
+
+    .ring {
+      width: 140px;
+      height: 140px;
+      position: relative;
+    }
+
+    svg {
+      transform: rotate(-90deg);
+    }
+
+    .bg {
+      fill: none;
+      stroke: #1e2a38;
+      stroke-width: 10;
+    }
+
+    .progress {
+      fill: none;
+      stroke-width: 10;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1s ease;
+    }
+
+    .label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .value {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .name {
+      font-size: 11px;
+      opacity: 0.6;
+    }
+
+    /* Colors like Apple Fitness */
+    .move { stroke: #ff2d55; }
+    .steps { stroke: #32d74b; }
+    .distance { stroke: #0a84ff; }
+
+    /* -----------------------
+       RAW DATA PANEL
+    ------------------------ */
+    .panel {
+      width: 90%;
+      max-width: 700px;
+      background: #141c26;
+      border-radius: 12px;
+      padding: 15px;
+      margin-top: 20px;
+    }
+
+    pre {
+      font-size: 12px;
+      overflow-x: auto;
+      opacity: 0.85;
+    }
+  </style>
 </head>
 
-<body style="background:#0b0f14;color:white;font-family:Arial;padding:20px">
+<body>
 
-<h2>Apple Health Dashboard</h2>
+<h1>Apple Health Dashboard</h1>
 
-<div>Steps: <span id="steps">--</span></div>
-<div>Heart Rate: <span id="heartRate">--</span></div>
-<div>Energy: <span id="energy">--</span></div>
-<div>Distance: <span id="distance">--</span></div>
+<div class="rings">
 
-<pre id="raw"></pre>
+  <!-- MOVE (Active Energy) -->
+  <div class="ring">
+    <svg width="140" height="140">
+      <circle class="bg" cx="70" cy="70" r="55"></circle>
+      <circle id="moveRing" class="progress move"
+        cx="70" cy="70" r="55"></circle>
+    </svg>
+    <div class="label">
+      <div class="value" id="energy">--</div>
+      <div class="name">MOVE</div>
+    </div>
+  </div>
+
+  <!-- STEPS -->
+  <div class="ring">
+    <svg width="140" height="140">
+      <circle class="bg" cx="70" cy="70" r="55"></circle>
+      <circle id="stepsRing" class="progress steps"
+        cx="70" cy="70" r="55"></circle>
+    </svg>
+    <div class="label">
+      <div class="value" id="steps">--</div>
+      <div class="name">STEPS</div>
+    </div>
+  </div>
+
+  <!-- DISTANCE -->
+  <div class="ring">
+    <svg width="140" height="140">
+      <circle class="bg" cx="70" cy="70" r="55"></circle>
+      <circle id="distanceRing" class="progress distance"
+        cx="70" cy="70" r="55"></circle>
+    </svg>
+    <div class="label">
+      <div class="value" id="distance">--</div>
+      <div class="name">MILES</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="panel">
+  <h3>Heart Rate</h3>
+  <div style="font-size:28px" id="heartRate">--</div>
+</div>
+
+<div class="panel">
+  <h3>Raw API Response</h3>
+  <pre id="raw"></pre>
+</div>
 
 <script>
 
 const API_URL = "https://script.google.com/macros/s/AKfycbyILualskjRxdTfVLiDVNZ-kBT1TwtLgwi8eay-DLH0MrXHC0OlQe_BmzHCtbrd7YQKTQ/exec";
 
+/* -----------------------
+   RING SETUP
+------------------------ */
+function setupRing(id) {
+  const circle = document.getElementById(id);
+  const radius = 55;
+  const circumference = 2 * Math.PI * radius;
+
+  circle.style.strokeDasharray = circumference;
+  circle.style.strokeDashoffset = circumference;
+
+  return function (percent) {
+    const offset = circumference - percent * circumference;
+    circle.style.strokeDashoffset = offset;
+  };
+}
+
+const setMove = setupRing("moveRing");
+const setSteps = setupRing("stepsRing");
+const setDistance = setupRing("distanceRing");
+
+/* -----------------------
+   MAIN LOAD
+------------------------ */
 function loadData() {
 
   const script = document.createElement("script");
-
   script.src = API_URL + "?callback=handleData";
-
   document.body.appendChild(script);
+}
+
+function clamp01(v) {
+  return Math.max(0, Math.min(1, v));
+}
+
+function animateNumber(id, value) {
+  document.getElementById(id).textContent = Math.round(value);
 }
 
 function handleData(data) {
 
   console.log("DATA:", data);
 
-  document.getElementById("steps").innerText = data.steps;
-  document.getElementById("heartRate").innerText = data.heartRate;
-  document.getElementById("energy").innerText = data.activeEnergy;
-  document.getElementById("distance").innerText = data.distance;
+  // -----------------------
+  // UPDATE NUMBERS
+  // -----------------------
+  animateNumber("steps", data.steps || 0);
+  animateNumber("energy", data.activeEnergy || 0);
+  animateNumber("distance", data.distance || 0);
+  animateNumber("heartRate", data.heartRate || 0);
 
-  document.getElementById("raw").innerText =
+  // -----------------------
+  // SIMPLE SCALING (tweak later)
+  // -----------------------
+  const stepsPct = clamp01((data.steps || 0) / 10000);
+  const movePct = clamp01((data.activeEnergy || 0) / 500);
+  const distPct = clamp01((data.distance || 0) / 5);
+
+  setSteps(stepsPct);
+  setMove(movePct);
+  setDistance(distPct);
+
+  // -----------------------
+  // DEBUG RAW
+  // -----------------------
+  document.getElementById("raw").textContent =
     JSON.stringify(data, null, 2);
 }
 
