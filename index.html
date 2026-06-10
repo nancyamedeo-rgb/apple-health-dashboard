@@ -1,134 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Apple Health Dashboard</title>
 
 <style>
-body {
-    margin: 0;
-    background: radial-gradient(circle at top, #0b0b10, #000);
-    color: white;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-    overflow: hidden;
+
+body{
+    margin:0;
+    background:#000;
+    color:white;
+    font-family:-apple-system,BlinkMacSystemFont,sans-serif;
+    overflow:hidden;
 }
 
-/* ===================== LAYOUT ===================== */
+/* =========================
+   MAIN LAYOUT
+========================= */
 
-.dashboard {
-    display: flex;
-    height: 100vh;
-    padding: 26px;
-    gap: 40px;
-    box-sizing: border-box;
+.dashboard{
+    display:flex;
+    height:100vh;
+    padding:30px;
+    box-sizing:border-box;
+    gap:40px;
 }
 
-/* ===================== RINGS ===================== */
+/* =========================
+   RINGS
+========================= */
 
-.left {
-    width: 460px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.left{
+    width:450px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
 }
 
-.rings {
-    position: relative;
-    width: 420px;
-    height: 420px;
-    filter: drop-shadow(0 0 18px rgba(255,45,85,0.25));
+.rings{
+    position:relative;
+    width:400px;
+    height:400px;
 }
 
-svg {
-    width: 100%;
-    height: 100%;
-    transform: rotate(-90deg);
+svg{
+    width:100%;
+    height:100%;
+    transform:rotate(-90deg);
 }
 
-.bg {
-    fill: none;
-    stroke: rgba(255,255,255,0.06);
-    stroke-width: 26;
+.bg{
+    fill:none;
+    stroke:#1c1c1e;
+    stroke-width:26;
 }
 
-.ring {
-    fill: none;
-    stroke-linecap: round;
-    stroke-width: 26;
-    transition: stroke-dashoffset 1s ease;
-    filter: drop-shadow(0 0 10px currentColor);
+.ring{
+    fill:none;
+    stroke-linecap:round;
+    stroke-width:26;
+    transition:stroke-dashoffset 1s ease;
 }
 
-.move { stroke: #ff2d55; }
-.exercise { stroke: #b4ff00; }
-.stand { stroke: #00c7ff; }
-
-.center {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+.move{
+    stroke:#ff2d55;
 }
 
-.big {
-    font-size: 72px;
-    font-weight: 800;
+.exercise{
+    stroke:#b4ff00;
 }
 
-.small {
-    font-size: 18px;
-    opacity: 0.7;
+.stand{
+    stroke:#00c7ff;
 }
 
-/* ===================== STATS ===================== */
-
-.stats {
-    flex: 1;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    align-content: center;
+.center{
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
 }
 
-.card {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 14px;
-    padding: 14px;
-    backdrop-filter: blur(10px);
+.big{
+    font-size:70px;
+    font-weight:800;
 }
 
-.label {
-    font-size: 14px;
-    opacity: 0.6;
+.small{
+    opacity:0.7;
+    font-size:18px;
 }
 
-.value {
-    font-size: 40px;
-    font-weight: 750;
+/* =========================
+   STATS
+========================= */
+
+.stats{
+    flex:1;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+    align-content:center;
 }
 
-/* ===================== CHARTS ===================== */
-
-.charts {
-    position: absolute;
-    bottom: 16px;
-    left: 16px;
-    right: 16px;
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 10px;
-    height: 170px;
+.card{
+    background:#111;
+    border-radius:16px;
+    padding:18px;
 }
 
-canvas {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 12px;
+.label{
+    opacity:0.6;
+    font-size:14px;
 }
+
+.value{
+    font-size:42px;
+    font-weight:750;
+    margin-top:8px;
+}
+
+/* =========================
+   CHARTS
+========================= */
+
+.charts{
+    position:absolute;
+    bottom:20px;
+    left:20px;
+    right:20px;
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:12px;
+    height:170px;
+}
+
+canvas{
+    background:#111;
+    border-radius:14px;
+}
+
 </style>
 </head>
 
@@ -138,6 +152,7 @@ canvas {
 
     <!-- LEFT -->
     <div class="left">
+
         <div class="rings">
 
             <svg viewBox="0 0 420 420">
@@ -158,23 +173,48 @@ canvas {
             </div>
 
         </div>
+
     </div>
 
     <!-- RIGHT -->
     <div class="stats">
 
-        <div class="card"><div class="label">Active Energy</div><div class="value" id="energy">0</div></div>
-        <div class="card"><div class="label">Exercise Minutes</div><div class="value" id="exercise">0</div></div>
-        <div class="card"><div class="label">Stand Hours</div><div class="value" id="stand">0</div></div>
-        <div class="card"><div class="label">Steps</div><div class="value" id="steps">0</div></div>
-        <div class="card"><div class="label">Heart Rate</div><div class="value" id="hr">0</div></div>
-        <div class="card"><div class="label">Resting HR</div><div class="value" id="restHR">0</div></div>
+        <div class="card">
+            <div class="label">Active Energy</div>
+            <div class="value" id="energy">0</div>
+        </div>
+
+        <div class="card">
+            <div class="label">Exercise Minutes</div>
+            <div class="value" id="exercise">0</div>
+        </div>
+
+        <div class="card">
+            <div class="label">Stand Hours</div>
+            <div class="value" id="stand">0</div>
+        </div>
+
+        <div class="card">
+            <div class="label">Steps</div>
+            <div class="value" id="steps">0</div>
+        </div>
+
+        <div class="card">
+            <div class="label">Heart Rate</div>
+            <div class="value" id="hr">0</div>
+        </div>
+
+        <div class="card">
+            <div class="label">Resting HR</div>
+            <div class="value" id="restHR">0</div>
+        </div>
 
     </div>
 
 </div>
 
 <!-- CHARTS -->
+
 <div class="charts">
     <canvas id="c1"></canvas>
     <canvas id="c2"></canvas>
@@ -185,170 +225,201 @@ canvas {
 
 <script>
 
-/* ===================== YOUR SHEET (AS REQUESTED) ===================== */
+/* =========================
+   YOUR GOOGLE SCRIPT URL
+========================= */
 
-const SHEET =
-'https://script.google.com/macros/s/AKfycbyILualskjRxdTfVLiDVNZ-kBT1TwtLgwi8eay-DLH0MrXHC0OlQe_BmzHCtbrd7YQKTQ/exec';
+const API =
+"https://script.google.com/macros/s/AKfycbyILualskjRxdTfVLiDVNZ-kBT1TwtLgwi8eay-DLH0MrXHC0OlQe_BmzHCtbrd7YQKTQ/exec?callback=handleData";
 
+/* =========================
+   RINGS
+========================= */
 
-/* ===================== CSV PARSER (ROBUST) ===================== */
+function setRing(id, r, pct){
 
-function parseCSV(text) {
-    const rows = [];
-    let row = [];
-    let val = "";
-    let inQuotes = false;
-
-    for (let i = 0; i < text.length; i++) {
-        const c = text[i];
-        const n = text[i+1];
-
-        if (c === '"' && inQuotes && n === '"') {
-            val += '"';
-            i++;
-        }
-        else if (c === '"') {
-            inQuotes = !inQuotes;
-        }
-        else if (c === ',' && !inQuotes) {
-            row.push(val);
-            val = "";
-        }
-        else if ((c === '\n' || c === '\r') && !inQuotes) {
-            if (row.length || val) {
-                row.push(val);
-                rows.push(row);
-                row = [];
-                val = "";
-            }
-        }
-        else {
-            val += c;
-        }
-    }
-
-    if (row.length || val) {
-        row.push(val);
-        rows.push(row);
-    }
-
-    return rows.filter(r => r.length > 1);
-}
-
-/* ===================== RINGS ===================== */
-
-function setRing(id, r, pct) {
     const el = document.getElementById(id);
+
     const c = 2 * Math.PI * r;
+
     el.style.strokeDasharray = c;
-    el.style.strokeDashoffset = c - (Math.min(pct,100)/100)*c;
-}
-
-/* ===================== CHART ===================== */
-
-function draw(canvas, data, title) {
-
-const ctx = canvas.getContext("2d");
-
-canvas.width = canvas.offsetWidth;
-canvas.height = canvas.offsetHeight;
-
-const w = canvas.width;
-const h = canvas.height;
-
-ctx.clearRect(0,0,w,h);
-
-ctx.fillStyle = "rgba(255,255,255,0.7)";
-ctx.font = "12px -apple-system";
-ctx.fillText(title, 10, 16);
-
-const min = Math.min(...data);
-const max = Math.max(...data);
-
-ctx.strokeStyle = "#00c7ff";
-ctx.lineWidth = 2;
-ctx.shadowColor = "#00c7ff";
-ctx.shadowBlur = 8;
-
-ctx.beginPath();
-
-data.forEach((v,i) => {
-
-    const x = (i/(data.length-1))*(w-20)+10;
-    const y = h - ((v-min)/(max-min||1))*(h-30)-8;
-
-    if(i===0) ctx.moveTo(x,y);
-    else ctx.lineTo(x,y);
-
-});
-
-ctx.stroke();
-ctx.shadowBlur = 0;
-}
-
-/* ===================== LOAD ===================== */
-
-async function load() {
-
-const res = await fetch(SHEET);
-const data = await res.json();
-
-/* last 7 days */
-const last7 = data.slice(-7);
-const latest = data[data.length - 1];
-
-/* helper */
-const get = (key) => parseFloat(latest[key]) || 0;
-
-/* ================= CURRENT ================= */
-
-const energy = get("Active Energy (kcal)");
-const exercise = get("Apple Exercise Time (min)");
-const stand = get("Apple Stand Hour (count)");
-const steps = get("Step Count (count)");
-const hr = get("Heart Rate [Avg] (count/min)");
-const restHR = get("Resting Heart Rate (count/min)");
-
-/* goals */
-const moveGoal = 500;
-const exGoal = 30;
-const standGoal = 12;
-
-/* rings */
-setRing("moveRing",150,(energy/moveGoal)*100);
-setRing("exerciseRing",115,(exercise/exGoal)*100);
-setRing("standRing",80,(stand/standGoal)*100);
-
-/* UI */
-document.getElementById("movePct").innerText =
-Math.round((energy/moveGoal)*100) + "%";
-
-document.getElementById("energy").innerText = Math.round(energy);
-document.getElementById("exercise").innerText = Math.round(exercise);
-document.getElementById("stand").innerText = Math.round(stand);
-document.getElementById("steps").innerText = Number(steps).toLocaleString();
-document.getElementById("hr").innerText = Math.round(hr);
-document.getElementById("restHR").innerText = Math.round(restHR);
-
-/* ================= TRENDS ================= */
-
-const energy7 = last7.map(d => parseFloat(d["Active Energy (kcal)"]) || 0);
-const steps7 = last7.map(d => parseFloat(d["Step Count (count)"]) || 0);
-const rest7 = last7.map(d => parseFloat(d["Resting Heart Rate (count/min)"]) || 0);
-const ex7 = last7.map(d => parseFloat(d["Apple Exercise Time (min)"]) || 0);
-const dist7 = last7.map(d => parseFloat(d["Walking + Running Distance (mi)"]) || 0);
-
-draw(c1, energy7, "Energy");
-draw(c2, steps7, "Steps");
-draw(c3, rest7, "Rest HR");
-draw(c4, ex7, "Exercise");
-draw(c5, dist7, "Distance");
+    el.style.strokeDashoffset =
+        c - (Math.min(pct,100)/100) * c;
 
 }
 
+/* =========================
+   CHARTS
+========================= */
 
-load();
-setInterval(load, 300000);
+function draw(canvas,data,title){
+
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = canvas.offsetWidth;
+    canvas.height = canvas.offsetHeight;
+
+    const w = canvas.width;
+    const h = canvas.height;
+
+    ctx.clearRect(0,0,w,h);
+
+    ctx.fillStyle = "rgba(255,255,255,0.7)";
+    ctx.font = "12px sans-serif";
+    ctx.fillText(title,10,18);
+
+    const min = Math.min(...data);
+    const max = Math.max(...data);
+
+    ctx.strokeStyle = "#00c7ff";
+    ctx.lineWidth = 2;
+
+    ctx.beginPath();
+
+    data.forEach((v,i)=>{
+
+        const x =
+            (i/(data.length-1))*(w-20)+10;
+
+        const y =
+            h - ((v-min)/(max-min||1))*(h-35)-10;
+
+        if(i===0) ctx.moveTo(x,y);
+        else ctx.lineTo(x,y);
+
+    });
+
+    ctx.stroke();
+
+}
+
+/* =========================
+   LOAD DATA (JSONP)
+========================= */
+
+function loadData(){
+
+    const old =
+        document.getElementById("jsonp");
+
+    if(old) old.remove();
+
+    const script =
+        document.createElement("script");
+
+    script.id = "jsonp";
+    script.src = API + "&t=" + Date.now();
+
+    document.body.appendChild(script);
+
+}
+
+/* =========================
+   HANDLE DATA
+========================= */
+
+function handleData(data){
+
+    if(!data || !data.length) return;
+
+    const latest =
+        data[data.length-1];
+
+    const last7 =
+        data.slice(-7);
+
+    const get =
+        (k) => parseFloat(latest[k]) || 0;
+
+    const energy =
+        get("Active Energy (kcal)");
+
+    const exercise =
+        get("Apple Exercise Time (min)");
+
+    const stand =
+        get("Apple Stand Hour (count)");
+
+    const steps =
+        get("Step Count (count)");
+
+    const hr =
+        get("Heart Rate [Avg] (count/min)");
+
+    const restHR =
+        get("Resting Heart Rate (count/min)");
+
+    /* RINGS */
+
+    setRing("moveRing",150,(energy/500)*100);
+    setRing("exerciseRing",115,(exercise/30)*100);
+    setRing("standRing",80,(stand/12)*100);
+
+    /* UI */
+
+    document.getElementById("movePct").innerText =
+        Math.round((energy/500)*100) + "%";
+
+    document.getElementById("energy").innerText =
+        Math.round(energy);
+
+    document.getElementById("exercise").innerText =
+        Math.round(exercise);
+
+    document.getElementById("stand").innerText =
+        Math.round(stand);
+
+    document.getElementById("steps").innerText =
+        Number(steps).toLocaleString();
+
+    document.getElementById("hr").innerText =
+        Math.round(hr);
+
+    document.getElementById("restHR").innerText =
+        Math.round(restHR);
+
+    /* 7 DAY TRENDS */
+
+    const energy7 =
+        last7.map(d =>
+            parseFloat(d["Active Energy (kcal)"]) || 0
+        );
+
+    const steps7 =
+        last7.map(d =>
+            parseFloat(d["Step Count (count)"]) || 0
+        );
+
+    const rest7 =
+        last7.map(d =>
+            parseFloat(d["Resting Heart Rate (count/min)"]) || 0
+        );
+
+    const ex7 =
+        last7.map(d =>
+            parseFloat(d["Apple Exercise Time (min)"]) || 0
+        );
+
+    const dist7 =
+        last7.map(d =>
+            parseFloat(d["Walking + Running Distance (mi)"]) || 0
+        );
+
+    draw(c1,energy7,"Energy");
+    draw(c2,steps7,"Steps");
+    draw(c3,rest7,"Rest HR");
+    draw(c4,ex7,"Exercise");
+    draw(c5,dist7,"Distance");
+
+}
+
+/* =========================
+   START
+========================= */
+
+loadData();
+
+setInterval(loadData,300000);
 
 </script>
 
