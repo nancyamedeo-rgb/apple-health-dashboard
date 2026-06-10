@@ -1,427 +1,137 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Apple Health Dashboard</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Apple Health Debug Dashboard</title>
 
-<style>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0b0f14;
+      color: white;
+    }
 
-body{
-    margin:0;
-    background:#000;
-    color:white;
-    font-family:-apple-system,BlinkMacSystemFont,sans-serif;
-    overflow:hidden;
-}
+    .container {
+      padding: 20px;
+      max-width: 900px;
+      margin: auto;
+    }
 
-/* =========================
-   MAIN LAYOUT
-========================= */
+    h1 {
+      font-size: 20px;
+    }
 
-.dashboard{
-    display:flex;
-    height:100vh;
-    padding:30px;
-    box-sizing:border-box;
-    gap:40px;
-}
+    .card {
+      background: #141c26;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 10px;
+    }
 
-/* =========================
-   RINGS
-========================= */
+    .label {
+      font-size: 12px;
+      opacity: 0.7;
+    }
 
-.left{
-    width:450px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
+    .value {
+      font-size: 22px;
+      margin-top: 5px;
+    }
 
-.rings{
-    position:relative;
-    width:400px;
-    height:400px;
-}
+    pre {
+      background: #111822;
+      padding: 10px;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 12px;
+      max-height: 300px;
+    }
 
-svg{
-    width:100%;
-    height:100%;
-    transform:rotate(-90deg);
-}
-
-.bg{
-    fill:none;
-    stroke:#1c1c1e;
-    stroke-width:26;
-}
-
-.ring{
-    fill:none;
-    stroke-linecap:round;
-    stroke-width:26;
-    transition:stroke-dashoffset 1s ease;
-}
-
-.move{
-    stroke:#ff2d55;
-}
-
-.exercise{
-    stroke:#b4ff00;
-}
-
-.stand{
-    stroke:#00c7ff;
-}
-
-.center{
-    position:absolute;
-    inset:0;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-}
-
-.big{
-    font-size:70px;
-    font-weight:800;
-}
-
-.small{
-    opacity:0.7;
-    font-size:18px;
-}
-
-/* =========================
-   STATS
-========================= */
-
-.stats{
-    flex:1;
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:16px;
-    align-content:center;
-}
-
-.card{
-    background:#111;
-    border-radius:16px;
-    padding:18px;
-}
-
-.label{
-    opacity:0.6;
-    font-size:14px;
-}
-
-.value{
-    font-size:42px;
-    font-weight:750;
-    margin-top:8px;
-}
-
-/* =========================
-   CHARTS
-========================= */
-
-.charts{
-    position:absolute;
-    bottom:20px;
-    left:20px;
-    right:20px;
-    display:grid;
-    grid-template-columns:repeat(5,1fr);
-    gap:12px;
-    height:170px;
-}
-
-canvas{
-    background:#111;
-    border-radius:14px;
-}
-
-</style>
+    .error {
+      color: #ff6b6b;
+    }
+  </style>
 </head>
 
 <body>
+  <div class="container">
+    <h1>Apple Health DEBUG Dashboard</h1>
 
-<div class="dashboard">
-
-    <!-- LEFT -->
-    <div class="left">
-
-        <div class="rings">
-
-            <svg viewBox="0 0 420 420">
-
-                <circle class="bg" cx="210" cy="210" r="150"/>
-                <circle class="bg" cx="210" cy="210" r="115"/>
-                <circle class="bg" cx="210" cy="210" r="80"/>
-
-                <circle id="moveRing" class="ring move" cx="210" cy="210" r="150"/>
-                <circle id="exerciseRing" class="ring exercise" cx="210" cy="210" r="115"/>
-                <circle id="standRing" class="ring stand" cx="210" cy="210" r="80"/>
-
-            </svg>
-
-            <div class="center">
-                <div class="big" id="movePct">0%</div>
-                <div class="small">Move</div>
-            </div>
-
-        </div>
-
+    <div class="card">
+      <div class="label">Steps</div>
+      <div class="value" id="steps">--</div>
     </div>
 
-    <!-- RIGHT -->
-    <div class="stats">
-
-        <div class="card">
-            <div class="label">Active Energy</div>
-            <div class="value" id="energy">0</div>
-        </div>
-
-        <div class="card">
-            <div class="label">Exercise Minutes</div>
-            <div class="value" id="exercise">0</div>
-        </div>
-
-        <div class="card">
-            <div class="label">Stand Hours</div>
-            <div class="value" id="stand">0</div>
-        </div>
-
-        <div class="card">
-            <div class="label">Steps</div>
-            <div class="value" id="steps">0</div>
-        </div>
-
-        <div class="card">
-            <div class="label">Heart Rate</div>
-            <div class="value" id="hr">0</div>
-        </div>
-
-        <div class="card">
-            <div class="label">Resting HR</div>
-            <div class="value" id="restHR">0</div>
-        </div>
-
+    <div class="card">
+      <div class="label">Heart Rate</div>
+      <div class="value" id="heartRate">--</div>
     </div>
 
-</div>
-
-<!-- CHARTS -->
-
-<div class="charts">
-    <canvas id="c1"></canvas>
-    <canvas id="c2"></canvas>
-    <canvas id="c3"></canvas>
-    <canvas id="c4"></canvas>
-    <canvas id="c5"></canvas>
-</div>
-
-<script>
-
-/* =========================
-   YOUR GOOGLE SCRIPT URL
-========================= */
-
-const API =
-"https://script.google.com/macros/s/AKfycbyILualskjRxdTfVLiDVNZ-kBT1TwtLgwi8eay-DLH0MrXHC0OlQe_BmzHCtbrd7YQKTQ/exec?callback=handleData";
-
-/* =========================
-   RINGS
-========================= */
-
-function setRing(id, r, pct){
-
-    const el = document.getElementById(id);
-
-    const c = 2 * Math.PI * r;
-
-    el.style.strokeDasharray = c;
-    el.style.strokeDashoffset =
-        c - (Math.min(pct,100)/100) * c;
-
-}
-
-/* =========================
-   CHARTS
-========================= */
-
-function draw(canvas,data,title){
-
-    const ctx = canvas.getContext("2d");
-
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
-
-    const w = canvas.width;
-    const h = canvas.height;
-
-    ctx.clearRect(0,0,w,h);
-
-    ctx.fillStyle = "rgba(255,255,255,0.7)";
-    ctx.font = "12px sans-serif";
-    ctx.fillText(title,10,18);
-
-    const min = Math.min(...data);
-    const max = Math.max(...data);
-
-    ctx.strokeStyle = "#00c7ff";
-    ctx.lineWidth = 2;
-
-    ctx.beginPath();
-
-    data.forEach((v,i)=>{
-
-        const x =
-            (i/(data.length-1))*(w-20)+10;
-
-        const y =
-            h - ((v-min)/(max-min||1))*(h-35)-10;
-
-        if(i===0) ctx.moveTo(x,y);
-        else ctx.lineTo(x,y);
-
-    });
-
-    ctx.stroke();
-
-}
-
-/* =========================
-   LOAD DATA (JSONP)
-========================= */
-
-function loadData(){
-
-    const old =
-        document.getElementById("jsonp");
-
-    if(old) old.remove();
-
-    const script =
-        document.createElement("script");
-
-    script.id = "jsonp";
-    script.src = API + "&t=" + Date.now();
-
-    document.body.appendChild(script);
-
-}
-
-/* =========================
-   HANDLE DATA
-========================= */
-
-function handleData(data){
-
-    if(!data || !data.length) return;
-
-    const latest =
-        data[data.length-1];
-
-    const last7 =
-        data.slice(-7);
-
-    const get =
-        (k) => parseFloat(latest[k]) || 0;
-
-    const energy =
-        get("Active Energy (kcal)");
-
-    const exercise =
-        get("Apple Exercise Time (min)");
-
-    const stand =
-        get("Apple Stand Hour (count)");
-
-    const steps =
-        get("Step Count (count)");
-
-    const hr =
-        get("Heart Rate [Avg] (count/min)");
-
-    const restHR =
-        get("Resting Heart Rate (count/min)");
-
-    /* RINGS */
-
-    setRing("moveRing",150,(energy/500)*100);
-    setRing("exerciseRing",115,(exercise/30)*100);
-    setRing("standRing",80,(stand/12)*100);
-
-    /* UI */
-
-    document.getElementById("movePct").innerText =
-        Math.round((energy/500)*100) + "%";
-
-    document.getElementById("energy").innerText =
-        Math.round(energy);
-
-    document.getElementById("exercise").innerText =
-        Math.round(exercise);
-
-    document.getElementById("stand").innerText =
-        Math.round(stand);
-
-    document.getElementById("steps").innerText =
-        Number(steps).toLocaleString();
-
-    document.getElementById("hr").innerText =
-        Math.round(hr);
-
-    document.getElementById("restHR").innerText =
-        Math.round(restHR);
-
-    /* 7 DAY TRENDS */
-
-    const energy7 =
-        last7.map(d =>
-            parseFloat(d["Active Energy (kcal)"]) || 0
-        );
-
-    const steps7 =
-        last7.map(d =>
-            parseFloat(d["Step Count (count)"]) || 0
-        );
-
-    const rest7 =
-        last7.map(d =>
-            parseFloat(d["Resting Heart Rate (count/min)"]) || 0
-        );
-
-    const ex7 =
-        last7.map(d =>
-            parseFloat(d["Apple Exercise Time (min)"]) || 0
-        );
-
-    const dist7 =
-        last7.map(d =>
-            parseFloat(d["Walking + Running Distance (mi)"]) || 0
-        );
-
-    draw(c1,energy7,"Energy");
-    draw(c2,steps7,"Steps");
-    draw(c3,rest7,"Rest HR");
-    draw(c4,ex7,"Exercise");
-    draw(c5,dist7,"Distance");
-
-}
-
-/* =========================
-   START
-========================= */
-
-loadData();
-
-setInterval(loadData,300000);
-
-</script>
-
+    <div class="card">
+      <div class="label">Active Energy</div>
+      <div class="value" id="energy">--</div>
+    </div>
+
+    <div class="card">
+      <div class="label">Distance</div>
+      <div class="value" id="distance">--</div>
+    </div>
+
+    <div class="card">
+      <div class="label">RAW API RESPONSE</div>
+      <pre id="raw"></pre>
+    </div>
+
+    <div class="card">
+      <div class="label">LATEST ROW</div>
+      <pre id="latest"></pre>
+    </div>
+
+    <div class="card error" id="error"></div>
+  </div>
+
+  <script>
+    const API_URL = "PASTE_YOUR_APPS_SCRIPT_URL_HERE";
+
+    async function loadData() {
+      try {
+        console.log("Fetching API:", API_URL);
+
+        const res = await fetch(API_URL);
+        const data = await res.json();
+
+        console.log("RAW API RESPONSE:", data);
+
+        const latest = Array.isArray(data)
+          ? data[data.length - 1]
+          : data;
+
+        console.log("LATEST ROW:", latest);
+
+        // Update UI
+        document.getElementById("steps").textContent = latest.steps ?? 0;
+        document.getElementById("heartRate").textContent = latest.heartRate ?? 0;
+        document.getElementById("energy").textContent = latest.activeEnergy ?? 0;
+        document.getElementById("distance").textContent = latest.distance ?? 0;
+
+        // Debug panels
+        document.getElementById("raw").textContent =
+          JSON.stringify(data, null, 2);
+
+        document.getElementById("latest").textContent =
+          JSON.stringify(latest, null, 2);
+
+      } catch (err) {
+        console.error(err);
+        document.getElementById("error").textContent =
+          "ERROR: Failed to load API. Check console.";
+      }
+    }
+
+    loadData();
+    setInterval(loadData, 60000);
+  </script>
 </body>
 </html>
