@@ -186,6 +186,26 @@ body {
 @media (max-width: 520px) {
   .charts-grid { grid-template-columns: 1fr; }
 }
+
+/* ── Compact mode (?compact=1) ── */
+body.compact .dash        { padding: 12px 14px; }
+body.compact .header      { margin-bottom: 14px; }
+body.compact .rings-row   { gap: 12px; margin-bottom: 14px; }
+body.compact .ring-svg    { width: 80px; height: 80px; }
+body.compact .ring-val    { font-size: 11px; }
+body.compact .ring-name   { font-size: 9px; }
+body.compact .ring-sub    { font-size: 9px; }
+body.compact .cards-grid  { gap: 7px; margin-bottom: 14px; }
+body.compact .stat-card   { padding: 9px 10px; border-radius: 10px; }
+body.compact .stat-label  { font-size: 9px; margin-bottom: 4px; }
+body.compact .stat-val    { font-size: 17px; }
+body.compact .stat-unit   { font-size: 11px; }
+body.compact .stat-null   { font-size: 12px; }
+body.compact .section-title { margin-bottom: 8px; }
+body.compact .charts-grid { gap: 9px; }
+body.compact .chart-card  { padding: 10px; border-radius: 10px; }
+body.compact .chart-title { margin-bottom: 6px; }
+body.compact .chart-wrap  { height: 85px; }
 </style>
 </head>
 <body>
@@ -193,7 +213,7 @@ body {
 <div class="dash">
 
   <div class="header">
-    <h1>Nancy's Health Dashboard</h1>
+    <h1>Nancy's Health</h1>
     <span class="updated" id="updatedLabel">loading…</span>
   </div>
 
@@ -313,7 +333,7 @@ function buildRings() {
     wrap.className = 'ring-wrap';
     wrap.innerHTML = `
       <div class="ring-pos">
-        <svg class="ring-svg" width="104" height="104" viewBox="0 0 104 104">
+        <svg class="ring-svg" width="104" height="104" viewBox="0 0 104 104" id="rsvg_${ring.key}">
           <circle class="ring-track" cx="${RING_CX}" cy="${RING_CY}" r="${RING_R}"/>
           <circle id="rf_${ring.key}" class="ring-fill"
             cx="${RING_CX}" cy="${RING_CY}" r="${RING_R}"
@@ -520,6 +540,15 @@ async function loadData() {
 buildRings();
 loadData();
 setInterval(loadData, 60000);
+
+
+// ── Compact mode ─────────────────────────────────────────────────────────────
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('compact') === '1') {
+    document.body.classList.add('compact');
+  }
+})();
 
 </script>
 </body>
