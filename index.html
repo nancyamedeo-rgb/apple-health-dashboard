@@ -224,6 +224,10 @@ body.compact .chart-wrap  { height: 85px; }
   <p class="section-title">Today</p>
   <div class="cards-grid">
     <div class="stat-card">
+      <div class="stat-label">Steps</div>
+      <div class="stat-val" id="sSteps">--</div>
+    </div>
+    <div class="stat-card">
       <div class="stat-label">Miles</div>
       <div class="stat-val" id="sMiles">--<span class="stat-unit">mi</span></div>
     </div>
@@ -289,13 +293,6 @@ const API_URL = "https://script.google.com/macros/s/AKfycbyILualskjRxdTfVLiDVNZ-
 
 const RINGS = [
   {
-    key: 'steps',
-    label: 'Steps',
-    goal: 10000,
-    color: '#32d74b',
-    fmt: v => v >= 1000 ? (v / 1000).toFixed(1) + 'k' : String(Math.round(v))
-  },
-  {
     key: 'activeEnergy',
     label: 'Move',
     goal: 500,
@@ -306,14 +303,14 @@ const RINGS = [
     key: 'exerciseMinutes',
     label: 'Exercise',
     goal: 30,
-    color: '#ff9f0a',
+    color: '#30d158',
     fmt: v => Math.round(v) + ' min'
   },
   {
     key: 'standHours',
     label: 'Stand',
     goal: 12,
-    color: '#bf5af2',
+    color: '#5ac8fa',
     fmt: v => Math.round(v) + ' hr'
   },
 ];
@@ -504,6 +501,10 @@ async function loadData() {
     });
 
     // Stat cards
+    const stepsVal = d.steps || 0;
+    setText('sSteps', stepsVal >= 1000
+      ? `${(stepsVal / 1000).toFixed(1)}<span class="stat-unit">k</span>`
+      : String(Math.round(stepsVal)));
     setText('sHR',  `${d.heartRate  || '--'}<span class="stat-unit">bpm</span>`);
     setText('sRHR', `${d.restingHeartRate || '--'}<span class="stat-unit">bpm</span>`);
     setText('sHRV', `${d.hrv        || '--'}<span class="stat-unit">ms</span>`);
@@ -523,7 +524,7 @@ async function loadData() {
     const t      = d.trend || {};
     const labels = t.labels || [];
 
-    barChart( 'cSteps',    labels, t.steps            || [], '#32d74b', 10000);
+    barChart( 'cSteps',    labels, t.steps            || [], '#30d158', 10000);
     barChart( 'cExercise', labels, t.exerciseMinutes   || [], '#ff9f0a', 30);
     lineChart('cRHR',      labels, t.restingHeartRate  || [], '#ff2d55');
     lineChart('cSleep',    labels, t.sleep             || [], '#0a84ff');
