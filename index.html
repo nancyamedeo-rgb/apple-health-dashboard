@@ -232,6 +232,18 @@ body.compact .chart-wrap  { height: 85px; }
       <div class="stat-val" id="sMiles">--<span class="stat-unit">mi</span></div>
     </div>
     <div class="stat-card">
+      <div class="stat-label">Move</div>
+      <div class="stat-val" style="color:#ff2d55" id="sMove">--<span class="stat-unit" style="color:#6b7280">cal</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Exercise</div>
+      <div class="stat-val" style="color:#30d158" id="sExercise">--<span class="stat-unit" style="color:#6b7280">min</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Stand</div>
+      <div class="stat-val" style="color:#5ac8fa" id="sStand">--<span class="stat-unit" style="color:#6b7280">hr</span></div>
+    </div>
+    <div class="stat-card">
       <div class="stat-label">Heart rate</div>
       <div class="stat-val" id="sHR">--<span class="stat-unit">bpm</span></div>
     </div>
@@ -506,6 +518,9 @@ async function loadData() {
       ? `${(stepsVal / 1000).toFixed(1)}<span class="stat-unit">k</span>`
       : String(Math.round(stepsVal)));
     setText('sHR',  `${d.heartRate  || '--'}<span class="stat-unit">bpm</span>`);
+    setText('sMove',     `${Math.round(d.activeEnergy || 0)}<span class="stat-unit" style="color:#6b7280">cal</span>`);
+    setText('sExercise', `${Math.round(d.exerciseMinutes || 0)}<span class="stat-unit" style="color:#6b7280">min</span>`);
+    setText('sStand',    `${Math.round(d.standHours || 0)}<span class="stat-unit" style="color:#6b7280">hr</span>`);
     setText('sRHR', `${d.restingHeartRate || '--'}<span class="stat-unit">bpm</span>`);
     setText('sHRV', `${d.hrv        || '--'}<span class="stat-unit">ms</span>`);
     setText('sO2',  `${d.bloodOxygen || '--'}<span class="stat-unit">%</span>`);
